@@ -1,77 +1,11 @@
-var schedule = require('/nodejs_modules/node_modules/node-schedule');
-var mySql = require('/nodejs_modules/node_modules/mysql');
-var exec = require('child_process').exec;
-var uuid = require('/nodejs_modules/node_modules/node-uuid');
-var DomainObjects = require('/home/kerry/backupproject/nodejs/domainobjects');
-
-
-var LogModel = function(){
-	var mySqlConnection = mySql.createConnection({
-	  host     : '127.0.0.1',
-	  user     : 'script_user',
-	  password : 'hist0l0gy',
-	  database : 'backupdatabase'
-	});
-	mySqlConnection.connect();
-
-	this.addLogEntry = function(inMessage, inGroupKey, inClass, inWhen, inDomain, inExtra, inCode){		
-		inMessage = mySqlConnection.escape(inMessage);
-		mySqlConnection.query("INSERT INTO tb_backupLog(message, groupKey, class, whenEntry, domain, extra, code) VALUES(" + inMessage + ", '" + inGroupKey + "', '" + inClass + "', '" + inWhen + "', '" + inDomain + "', '" + inExtra + "', '" + inCode + "' )");
-	}
-
-	this.getArrayOfIgnoreErrors = function(){
-
-	}
-
-
-};
-
-var logModel = new LogModel();
-
-var IgnoreErrorsObject = function(){
-	var _this = this;
-
-	var ignoreErrors = {};
-
-	this.add = function(inErrorMessage){
-		ignoreErrors[inErrorMessage.trim()] = true;	
-	}
-
-	this.match = function(inMessage){
-		if(inMessage.trim() in ignoreErrors){
-			return true;
-		}else{
-			return false;
-		}	
-	}
-
-	var mySqlConnection = mySql.createConnection({
-	  	host     : '127.0.0.1',
-	  	user     : 'script_user',
-	  	password : 'hist0l0gy',
-	  	database : 'backupdatabase'
-	});
-	mySqlConnection.connect();
-	mySqlConnection.query("SELECT message from tb_ignoreErrors", 
-		function(err, rows, fields) { 	 		
- 	 		for(rowIndex in rows){
- 	 			console.log("IGNORE ERROR ADD:"+rows[rowIndex].message);
- 	 			_this.add(rows[rowIndex].message);
- 	 		}  			
-		}
-	);
-
-	mySqlConnection.end();
-}
-
-ignoreErrorsObject = new IgnoreErrorsObject();
-
-
-
+var schedule = require('../nodejs_modules/node_modules/node-schedule');
+var mySql = require('../nodejs_modules/node_modules/mysql');
+var uuid = require('../nodejs_modules/node_modules/node-uuid');
 
 
 // --- BUILD -------------------------------------
-var backupBaseDirectory = '/home/kerry/backupproject/';
+
+
 
 /*
 *@param:input scriptFile:,onMessage:,onFail:,onClose:, onSuccess:
@@ -79,9 +13,7 @@ var backupBaseDirectory = '/home/kerry/backupproject/';
 *
 */
 var JsonScriptObject = function(inJsonData){
-	var _this = this;
-	var request = require('/nodejs_modules/node_modules/request-json');	
-	var client = request.newClient('http://127.0.0.1/');
+	var _this = this;	
 	var RSO = require(inJsonData.scriptFile);
 	var rso = new RSO(inJsonData);	
 	
@@ -101,23 +33,19 @@ var JsonScriptObject = function(inJsonData){
 }
 
 
-
-
-
-
 //--------- EMAIL OBJECT ----------------->
 
 var EmailObject = function(inDestinationEmail){
 	var _this = this;
-	var nodemailer = require('/nodejs_modules/node_modules/nodemailer');
+	var nodemailer = require('../nodejs_modules/node_modules/nodemailer');
 	var destinationEmail = inDestinationEmail;
 	var transporter = nodemailer.createTransport(
 		{
 	    	service: 'gmail',
 	    	auth: 
 		    	{
-			        user: 'arfcomm@gmail.com',
-			        pass: 'hist0l0gy'
+			        user: 'soemthing@gmail.com',
+			        pass: 'passw0rd'
 			    }
 		}
 	);
@@ -126,7 +54,7 @@ var EmailObject = function(inDestinationEmail){
 	this.sendMail = function(inSubject, inMessage){
 		transporter.sendMail(
 			{
-			    from: 'arfcomm@gmail.com',
+			    from: 'something@gmail.com',
 			    to: destinationEmail,
 			    subject: inSubject,
 			    text: inMessage
@@ -162,7 +90,7 @@ hoppDevEmailObject.sendMail('serverBoot', "nodeJs has just booted!!!!");
 
 var wallyBackup = new JsonScriptObject(
 	{
-		'scriptFile':'/home/kerry/backupproject/ajax/rso_test_run_wallybackup.js',
+		'scriptFile':'../scripts/rso_test_run_wallybackup.js',
 
 		'onStart': function(inDate, inLabel, inRef){
 			console.log(inLabel + 'Started at :' + inDate);
