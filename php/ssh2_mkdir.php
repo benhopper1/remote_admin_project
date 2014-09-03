@@ -17,51 +17,51 @@ class MkDirObject{
 
 	private $directoryArray;
 	private $connectionObject;
-    private $uniErrorFlag = false;
+	private $uniErrorFlag = false;
 
-    public function __construct($inConnectionObject, $inArrayOfDirectory){
-    	$this->connectionObject = $inConnectionObject;
-        $this->directoryArray = $inArrayOfDirectory;
-    }
+	public function __construct($inConnectionObject, $inArrayOfDirectory){
+		$this->connectionObject = $inConnectionObject;
+		$this->directoryArray = $inArrayOfDirectory;
+	}
 
-    public function exec(){
-        $report = array();
-    	foreach($this->directoryArray as $dirObject){
-    		$report[] = $this->mkdir($dirObject);
-    	}
-        //$report['uniErrorFlag'] = $this->uniErrorFlag;
+	public function exec(){
+		$report = array();
+		foreach($this->directoryArray as $dirObject){
+			$report[] = $this->mkdir($dirObject);
+		}
+		//$report['uniErrorFlag'] = $this->uniErrorFlag;
 
-        return $report;
-    }
+		return $report;
+	}
 
-    public function getUniErrorFlag(){
-        return $this->uniErrorFlag;
-    }
+	public function getUniErrorFlag(){
+		return $this->uniErrorFlag;
+	}
 
-    private function mkdir($inDirectory){
-    	$path = $inDirectory['path'];
-    	$mode = $inDirectory['mode']; 
-    	$isRecursive = $inDirectory['isRecursive'];
+	private function mkdir($inDirectory){
+		$path = $inDirectory['path'];
+		$mode = $inDirectory['mode']; 
+		$isRecursive = $inDirectory['isRecursive'];
 
-    	$resultBool = ssh2_sftp_mkdir(ssh2_sftp($this->connectionObject->getConnection()) , $path, $mode, $isRecursive);		
-        
-    	$returnArray = array();
+		$resultBool = ssh2_sftp_mkdir(ssh2_sftp($this->connectionObject->getConnection()) , $path, $mode, $isRecursive);		
+		
+		$returnArray = array();
 
-    	$returnArray['hasError'] = !($resultBool);
-    	if($resultBool){
-    		$returnArray['message'] = 'directory created';
-            $returnArray['directoryCreated'] = $path;
-    		$returnArray['errorMessage'] = ''; 
+		$returnArray['hasError'] = !($resultBool);
+		if($resultBool){
+			$returnArray['message'] = 'directory created';
+			$returnArray['directoryCreated'] = $path;
+			$returnArray['errorMessage'] = '';
 		}else{
-            $this->uniErrorFlag = true;
+			$this->uniErrorFlag = true;
 			$returnArray['message'] = '';
-            $returnArray['directoryNotCreated'] = $path;
-    		$returnArray['errorMessage'] = 'error: directory not created'; 
+			$returnArray['directoryNotCreated'] = $path;
+			$returnArray['errorMessage'] = 'error: directory not created'; 
 		}    
 
-        return $returnArray;  	 
+		return $returnArray;  	 
 
-    }
+	}
 }
 
 
